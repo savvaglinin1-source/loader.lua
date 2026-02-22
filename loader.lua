@@ -1,164 +1,154 @@
--- Загрузчик с жёстко прописанной ссылкой Work.ink
+-- Загрузчик в стиле Fluent (без отображения ссылки)
 local Junkie = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
 
 -- ===== НАСТРОЙКИ (ЗАМЕНИТЬ) =====
--- Данные для проверки ключа (из Junkie)
-local work_service = "sladko_work"      -- Твоё название сервиса
-local work_identifier = "554171"          -- Твой идентификатор (число)
-
--- Ссылка на основной скрипт в Junkie
+local work_service = "sladko_work"          -- Название сервиса в Junkie
+local work_identifier = "554171"              -- Identifier сервиса
 local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"
-
--- Жёстко заданная ссылка на получение ключа (твоя)
-local WORK_LINK = "https://work.ink/2kaf/sladko-loader-checkpoint-1"
+local WORK_LINK = "https://work.ink/2kaf/sladko-loader-checkpoint-1"  -- Твоя ссылка
 -- =================================
 
--- Создание UI (меню)
+-- Создание главного окна
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "KeySystem"
+screenGui.Name = "FluentKeySystem"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = game:GetService("CoreGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 400, 0, 280)
-frame.Position = UDim2.new(0.5, -200, 0.5, -140)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+frame.Size = UDim2.new(0, 350, 0, 240)
+frame.Position = UDim2.new(0.5, -175, 0.5, -120)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)  -- Тёмный фон как в Fluent
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
 
+-- Скруглённые углы
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
+corner.CornerRadius = UDim.new(0, 10)
 corner.Parent = frame
 
+-- Заголовок
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -20, 0, 30)
+title.Size = UDim2.new(1, -20, 0, 40)
 title.Position = UDim2.new(0, 10, 0, 10)
 title.BackgroundTransparency = 1
 title.Text = "Key System"
-title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
+title.TextSize = 22
 title.Parent = frame
 
--- Блок со ссылкой
-local linkLabel = Instance.new("TextLabel")
-linkLabel.Size = UDim2.new(1, -90, 0, 40)
-linkLabel.Position = UDim2.new(0, 10, 0, 45)
-linkLabel.BackgroundColor3 = Color3.fromRGB(45,45,50)
-linkLabel.Text = "Ссылка: " .. WORK_LINK
-linkLabel.TextColor3 = Color3.fromRGB(200,200,200)
-linkLabel.Font = Enum.Font.Gotham
-linkLabel.TextSize = 14
-linkLabel.TextWrapped = true
-linkLabel.Parent = frame
+-- Кнопка получения ключа (стиль Fluent)
+local getKeyButton = Instance.new("TextButton")
+getKeyButton.Size = UDim2.new(1, -20, 0, 45)
+getKeyButton.Position = UDim2.new(0, 10, 0, 55)
+getKeyButton.BackgroundColor3 = Color3.fromRGB(55, 105, 255)  -- Синий акцент
+getKeyButton.Text = "Get Key"
+getKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+getKeyButton.Font = Enum.Font.GothamBold
+getKeyButton.TextSize = 18
+getKeyButton.Parent = frame
 
-local linkCorner = Instance.new("UICorner")
-linkCorner.CornerRadius = UDim.new(0, 6)
-linkCorner.Parent = linkLabel
-
-local copyButton = Instance.new("TextButton")
-copyButton.Size = UDim2.new(0, 70, 0, 40)
-copyButton.Position = UDim2.new(1, -80, 0, 45)
-copyButton.BackgroundColor3 = Color3.fromRGB(80,150,255)
-copyButton.Text = "Копировать"
-copyButton.TextColor3 = Color3.fromRGB(255,255,255)
-copyButton.Font = Enum.Font.Gotham
-copyButton.TextSize = 14
-copyButton.Parent = frame
-
-local copyCorner = Instance.new("UICorner")
-copyCorner.CornerRadius = UDim.new(0, 6)
-copyCorner.Parent = copyButton
+local getKeyCorner = Instance.new("UICorner")
+getKeyCorner.CornerRadius = UDim.new(0, 8)
+getKeyCorner.Parent = getKeyButton
 
 -- Поле ввода ключа
 local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(1, -80, 0, 35)
-keyBox.Position = UDim2.new(0, 10, 0, 100)
-keyBox.BackgroundColor3 = Color3.fromRGB(45,45,50)
-keyBox.PlaceholderText = "Введи ключ"
+keyBox.Size = UDim2.new(1, -90, 0, 45)
+keyBox.Position = UDim2.new(0, 10, 0, 115)
+keyBox.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+keyBox.PlaceholderText = "Enter your key"
+keyBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 140)
 keyBox.Text = ""
-keyBox.TextColor3 = Color3.fromRGB(255,255,255)
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 keyBox.Font = Enum.Font.Gotham
 keyBox.TextSize = 16
 keyBox.ClearTextOnFocus = false
 keyBox.Parent = frame
 
-local boxCorner = Instance.new("UICorner")
-boxCorner.CornerRadius = UDim.new(0, 6)
-boxCorner.Parent = keyBox
+local keyBoxCorner = Instance.new("UICorner")
+keyBoxCorner.CornerRadius = UDim.new(0, 8)
+keyBoxCorner.Parent = keyBox
 
--- Кнопка проверки
-local checkButton = Instance.new("TextButton")
-checkButton.Size = UDim2.new(0, 60, 0, 35)
-checkButton.Position = UDim2.new(1, -70, 0, 100)
-checkButton.BackgroundColor3 = Color3.fromRGB(0,200,100)
-checkButton.Text = "OK"
-checkButton.TextColor3 = Color3.fromRGB(255,255,255)
-checkButton.Font = Enum.Font.GothamBold
-checkButton.TextSize = 16
-checkButton.Parent = frame
+-- Кнопка проверки (OK)
+local okButton = Instance.new("TextButton")
+okButton.Size = UDim2.new(0, 70, 0, 45)
+okButton.Position = UDim2.new(1, -80, 0, 115)
+okButton.BackgroundColor3 = Color3.fromRGB(45, 185, 90)  -- Зелёный
+okButton.Text = "OK"
+okButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+okButton.Font = Enum.Font.GothamBold
+okButton.TextSize = 18
+okButton.Parent = frame
 
-local checkCorner = Instance.new("UICorner")
-checkCorner.CornerRadius = UDim.new(0, 6)
-checkCorner.Parent = checkButton
+local okCorner = Instance.new("UICorner")
+okCorner.CornerRadius = UDim.new(0, 8)
+okCorner.Parent = okButton
 
--- Статус
+-- Статусная строка (для уведомлений)
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -20, 0, 60)
-statusLabel.Position = UDim2.new(0, 10, 0, 150)
+statusLabel.Size = UDim2.new(1, -20, 0, 40)
+statusLabel.Position = UDim2.new(0, 10, 0, 175)
 statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Скопируй ссылку и получи ключ."
-statusLabel.TextColor3 = Color3.fromRGB(180,180,180)
+statusLabel.Text = "Click 'Get Key' to receive a key"
+statusLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 14
 statusLabel.TextWrapped = true
 statusLabel.Parent = frame
 
--- Логика
+-- Переменные
 local attempts = 0
 local maxAttempts = 5
 local validating = false
 
-local function setStatus(text, isError)
+-- Функция обновления статуса
+local function setStatus(text, isError, temporary)
     statusLabel.Text = text
-    statusLabel.TextColor3 = isError and Color3.fromRGB(255,100,100) or Color3.fromRGB(180,180,180)
+    statusLabel.TextColor3 = isError and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(160, 160, 160)
+    if temporary then
+        task.wait(2)
+        statusLabel.Text = "Click 'Get Key' to receive a key"
+        statusLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+    end
 end
 
--- Копирование ссылки
-copyButton.MouseButton1Click:Connect(function()
+-- Кнопка получения ключа (копирует ссылку)
+getKeyButton.MouseButton1Click:Connect(function()
     setclipboard(WORK_LINK)
-    setStatus("Ссылка скопирована!")
+    setStatus("✅ Link copied! Open it in your browser to get the key.", false, true)
 end)
 
--- Проверка ключа
-checkButton.MouseButton1Click:Connect(function()
+-- Кнопка проверки ключа
+okButton.MouseButton1Click:Connect(function()
     if validating then return end
     local key = keyBox.Text
     if #key == 0 then
-        setStatus("Введи ключ!", true)
-        return
-    end
-    attempts = attempts + 1
-    if attempts > maxAttempts then
-        setStatus("Превышено число попыток.", true)
+        setStatus("❌ Please enter a key!", true, true)
         return
     end
 
-    -- Проверяем ключ через Junkie
+    attempts = attempts + 1
+    if attempts > maxAttempts then
+        setStatus("❌ Too many failed attempts. Restart.", true)
+        return
+    end
+
+    validating = true
+    setStatus("⏳ Checking key...", false)
+
     local checker = Junkie
     checker.service = work_service
     checker.identifier = work_identifier
     checker.provider = "Work.ink"
 
-    validating = true
-    setStatus("Проверяю ключ...")
     local result = checker.check_key(key)
     validating = false
 
     if result and result.valid then
-        setStatus("Ключ принят! Загружаю скрипт...")
+        setStatus("✅ Key accepted! Loading script...", false)
         getgenv().SCRIPT_KEY = key
         local success, err = pcall(function()
             loadstring(game:HttpGet(MAIN_SCRIPT_URL))()
@@ -166,13 +156,13 @@ checkButton.MouseButton1Click:Connect(function()
         if success then
             screenGui:Destroy()
         else
-            setStatus("Ошибка загрузки скрипта: " .. tostring(err), true)
+            setStatus("❌ Failed to load script: " .. tostring(err), true)
         end
     else
-        local errorMsg = result and result.error or "Неизвестная ошибка"
-        setStatus("Ошибка: " .. errorMsg, true)
+        local errorMsg = result and result.error or "Unknown error"
+        setStatus("❌ Error: " .. errorMsg, true, true)
         if errorMsg == "HWID_BANNED" then
-            wait(2)
+            task.wait(2)
             game.Players.LocalPlayer:Kick("HWID banned")
         end
     end

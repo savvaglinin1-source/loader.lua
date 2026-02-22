@@ -1,169 +1,212 @@
--- Загрузчик в стиле Fluent (без отображения ссылки)
+-- Загрузчик в стиле Fluent с динамическими ссылками на Work.ink и Linkvertise
 local Junkie = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
 
--- ===== НАСТРОЙКИ (ЗАМЕНИТЬ) =====
-local work_service = "sladko_work"          -- Название сервиса в Junkie
-local work_identifier = "554171"              -- Identifier сервиса
-local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"
-local WORK_LINK = "https://work.ink/2kaf/sladko-loader-checkpoint-1"  -- Твоя ссылка
--- =================================
+-- ===== НАСТРОЙКИ (ЗАМЕНИТЬ, ЕСЛИ НУЖНО) =====
+local work_service = "sladko_work"          -- Название сервиса для Work.ink (из Junkie)
+local work_identifier = "12620"              -- Identifier для Work.ink (твой)
 
--- Создание главного окна
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FluentKeySystem"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = game:GetService("CoreGui")
+local link_service = "sladko_link"           -- Название сервиса для Linkvertise
+local link_identifier = "12621"               -- Identifier для Linkvertise (твой)
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 350, 0, 240)
-frame.Position = UDim2.new(0.5, -175, 0.5, -120)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)  -- Тёмный фон как в Fluent
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-frame.Parent = screenGui
+local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"  -- Ссылка на твой скрипт
+-- ============================================
 
--- Скруглённые углы
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
-corner.Parent = frame
+-- Загружаем Fluent
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
--- Заголовок
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -20, 0, 40)
-title.Position = UDim2.new(0, 10, 0, 10)
-title.BackgroundTransparency = 1
-title.Text = "Key System"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 22
-title.Parent = frame
+-- Создаём окно
+local Window = Fluent:CreateWindow({
+    Title = "Key System",
+    SubTitle = "sladko v1.0",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(450, 300),
+    Acrylic = false,
+    Theme = "Dark"
+})
 
--- Кнопка получения ключа (стиль Fluent)
-local getKeyButton = Instance.new("TextButton")
-getKeyButton.Size = UDim2.new(1, -20, 0, 45)
-getKeyButton.Position = UDim2.new(0, 10, 0, 55)
-getKeyButton.BackgroundColor3 = Color3.fromRGB(55, 105, 255)  -- Синий акцент
-getKeyButton.Text = "Get Key"
-getKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-getKeyButton.Font = Enum.Font.GothamBold
-getKeyButton.TextSize = 18
-getKeyButton.Parent = frame
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "key" })
+}
 
-local getKeyCorner = Instance.new("UICorner")
-getKeyCorner.CornerRadius = UDim.new(0, 8)
-getKeyCorner.Parent = getKeyButton
-
--- Поле ввода ключа
-local keyBox = Instance.new("TextBox")
-keyBox.Size = UDim2.new(1, -90, 0, 45)
-keyBox.Position = UDim2.new(0, 10, 0, 115)
-keyBox.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-keyBox.PlaceholderText = "Enter your key"
-keyBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 140)
-keyBox.Text = ""
-keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 16
-keyBox.ClearTextOnFocus = false
-keyBox.Parent = frame
-
-local keyBoxCorner = Instance.new("UICorner")
-keyBoxCorner.CornerRadius = UDim.new(0, 8)
-keyBoxCorner.Parent = keyBox
-
--- Кнопка проверки (OK)
-local okButton = Instance.new("TextButton")
-okButton.Size = UDim2.new(0, 70, 0, 45)
-okButton.Position = UDim2.new(1, -80, 0, 115)
-okButton.BackgroundColor3 = Color3.fromRGB(45, 185, 90)  -- Зелёный
-okButton.Text = "OK"
-okButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-okButton.Font = Enum.Font.GothamBold
-okButton.TextSize = 18
-okButton.Parent = frame
-
-local okCorner = Instance.new("UICorner")
-okCorner.CornerRadius = UDim.new(0, 8)
-okCorner.Parent = okButton
-
--- Статусная строка (для уведомлений)
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -20, 0, 40)
-statusLabel.Position = UDim2.new(0, 10, 0, 175)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Click 'Get Key' to receive a key"
-statusLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 14
-statusLabel.TextWrapped = true
-statusLabel.Parent = frame
-
--- Переменные
+-- Переменные для хранения ссылок
+local workLink = nil
+local linkLink = nil
 local attempts = 0
 local maxAttempts = 5
 local validating = false
 
--- Функция обновления статуса
-local function setStatus(text, isError, temporary)
-    statusLabel.Text = text
-    statusLabel.TextColor3 = isError and Color3.fromRGB(255, 100, 100) or Color3.fromRGB(160, 160, 160)
-    if temporary then
-        task.wait(2)
-        statusLabel.Text = "Click 'Get Key' to receive a key"
-        statusLabel.TextColor3 = Color3.fromRGB(160, 160, 160)
+-- Функция получения ссылок для обоих сервисов
+local function fetchLinks()
+    -- Для Work.ink
+    local w = Junkie
+    w.service = work_service
+    w.identifier = work_identifier
+    w.provider = "Work.ink"  -- или "Mixed", если провайдер настроен иначе
+    local wl, werr = w.get_key_link()
+    if wl then
+        workLink = wl
+    else
+        Fluent:Notify({
+            Title = "Work.ink Error",
+            Content = "Failed to get link: " .. tostring(werr),
+            Duration = 5
+        })
+    end
+
+    -- Для Linkvertise
+    local l = Junkie
+    l.service = link_service
+    l.identifier = link_identifier
+    l.provider = "Linkvertise"
+    local ll, lerr = l.get_key_link()
+    if ll then
+        linkLink = ll
+    else
+        Fluent:Notify({
+            Title = "Linkvertise Error",
+            Content = "Failed to get link: " .. tostring(lerr),
+            Duration = 5
+        })
+    end
+
+    if workLink or linkLink then
+        Fluent:Notify({
+            Title = "Links Ready",
+            Content = "You can now get your key from any provider.",
+            Duration = 3
+        })
+    else
+        Fluent:Notify({
+            Title = "Critical Error",
+            Content = "Could not get any links. Check Junkie settings.",
+            Duration = 5
+        })
     end
 end
 
--- Кнопка получения ключа (копирует ссылку)
-getKeyButton.MouseButton1Click:Connect(function()
-    setclipboard(WORK_LINK)
-    setStatus("✅ Link copied! Open it in your browser to get the key.", false, true)
-end)
+-- Описание
+Tabs.Main:AddParagraph({
+    Title = "Welcome",
+    Content = "Choose a provider to get a key, then enter it below."
+})
+
+-- Кнопка для Work.ink
+Tabs.Main:AddButton({
+    Title = "Get Key (Work.ink)",
+    Description = "Copy Work.ink link to clipboard",
+    Callback = function()
+        if workLink then
+            setclipboard(workLink)
+            Fluent:Notify({
+                Title = "Work.ink Link Copied",
+                Content = "Open it in your browser to get the key.",
+                Duration = 3
+            })
+        else
+            Fluent:Notify({
+                Title = "Error",
+                Content = "Work.ink link not available. Try again later.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Кнопка для Linkvertise
+Tabs.Main:AddButton({
+    Title = "Get Key (Linkvertise)",
+    Description = "Copy Linkvertise link to clipboard",
+    Callback = function()
+        if linkLink then
+            setclipboard(linkLink)
+            Fluent:Notify({
+                Title = "Linkvertise Link Copied",
+                Content = "Open it in your browser to get the key.",
+                Duration = 3
+            })
+        else
+            Fluent:Notify({
+                Title = "Error",
+                Content = "Linkvertise link not available. Try again later.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Поле ввода ключа
+local keyInput = Tabs.Main:AddInput("KeyInput", {
+    Title = "Your Key",
+    Default = "",
+    Placeholder = "Enter key here...",
+    Numeric = false,
+    Finished = false,
+    Callback = function() end
+})
 
 -- Кнопка проверки ключа
-okButton.MouseButton1Click:Connect(function()
-    if validating then return end
-    local key = keyBox.Text
-    if #key == 0 then
-        setStatus("❌ Please enter a key!", true, true)
-        return
-    end
+Tabs.Main:AddButton({
+    Title = "OK",
+    Description = "Validate your key",
+    Callback = function()
+        if validating then return end
+        local key = keyInput.Value
+        if #key == 0 then
+            Fluent:Notify({ Title = "Error", Content = "Please enter a key!", Duration = 2 })
+            return
+        end
 
-    attempts = attempts + 1
-    if attempts > maxAttempts then
-        setStatus("❌ Too many failed attempts. Restart.", true)
-        return
-    end
+        attempts = attempts + 1
+        if attempts > maxAttempts then
+            Fluent:Notify({ Title = "Error", Content = "Too many failed attempts.", Duration = 3 })
+            return
+        end
 
-    validating = true
-    setStatus("⏳ Checking key...", false)
+        validating = true
+        Fluent:Notify({ Title = "Checking", Content = "Validating key...", Duration = 1.5 })
 
-    local checker = Junkie
-    checker.service = work_service
-    checker.identifier = work_identifier
-    checker.provider = "Work.ink"
+        -- Используем сервис Work.ink для проверки (можно заменить на link_service)
+        local checker = Junkie
+        checker.service = work_service
+        checker.identifier = work_identifier
+        checker.provider = "Work.ink"
 
-    local result = checker.check_key(key)
-    validating = false
+        local result = checker.check_key(key)
+        validating = false
 
-    if result and result.valid then
-        setStatus("✅ Key accepted! Loading script...", false)
-        getgenv().SCRIPT_KEY = key
-        local success, err = pcall(function()
-            loadstring(game:HttpGet(MAIN_SCRIPT_URL))()
-        end)
-        if success then
-            screenGui:Destroy()
+        if result and result.valid then
+            Fluent:Notify({ Title = "Success", Content = "Key accepted! Loading script...", Duration = 2 })
+            getgenv().SCRIPT_KEY = key
+            local success, err = pcall(function()
+                loadstring(game:HttpGet(MAIN_SCRIPT_URL))()
+            end)
+            if success then
+                Window:Destroy()
+            else
+                Fluent:Notify({ Title = "Error", Content = "Failed to load script: " .. tostring(err), Duration = 4 })
+            end
         else
-            setStatus("❌ Failed to load script: " .. tostring(err), true)
-        end
-    else
-        local errorMsg = result and result.error or "Unknown error"
-        setStatus("❌ Error: " .. errorMsg, true, true)
-        if errorMsg == "HWID_BANNED" then
-            task.wait(2)
-            game.Players.LocalPlayer:Kick("HWID banned")
+            local errorMsg = result and result.error or "Unknown error"
+            Fluent:Notify({ Title = "Invalid Key", Content = "Error: " .. errorMsg, Duration = 3 })
+            if errorMsg == "HWID_BANNED" then
+                task.wait(2)
+                game.Players.LocalPlayer:Kick("HWID banned")
+            end
         end
     end
-end)
+})
+
+-- Добавляем менеджеры (опционально)
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+InterfaceManager:SetFolder("sladko_keys")
+SaveManager:SetFolder("sladko_keys")
+SaveManager:BuildConfigSection(Tabs.Main)
+InterfaceManager:BuildInterfaceSection(Tabs.Main)
+
+-- Запускаем получение ссылок при старте
+fetchLinks()
+Window:SelectTab(1)

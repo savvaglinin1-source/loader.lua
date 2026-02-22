@@ -1,20 +1,18 @@
--- Загрузчик в стиле Fluent с динамическими ссылками на Work.ink и Linkvertise
+-- Загрузчик в стиле Fluent с динамическими ссылками (Work.ink и Linkvertise)
 local Junkie = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
 
--- ===== НАСТРОЙКИ (ЗАМЕНИТЬ, ЕСЛИ НУЖНО) =====
-local work_service = "sladko_work"          -- Название сервиса для Work.ink (из Junkie)
-local work_identifier = "12620"              -- Identifier для Work.ink (твой)
+-- ===== НАСТРОЙКИ (ЗАМЕНИ ПРИ НЕОБХОДИМОСТИ) =====
+local work_service = "sladko_work"          -- Название сервиса для Work.ink
+local work_identifier = "12620"              -- Identifier для Work.ink
 
 local link_service = "sladko_link"           -- Название сервиса для Linkvertise
-local link_identifier = "12621"               -- Identifier для Linkvertise (твой)
+local link_identifier = "12621"               -- Identifier для Linkvertise
 
-local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"  -- Ссылка на твой скрипт
--- ============================================
+local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"  -- Твой скрипт
+-- ================================================
 
--- Загружаем Fluent
+-- Загружаем Fluent (без сохранения конфигов)
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 -- Создаём окно
 local Window = Fluent:CreateWindow({
@@ -30,32 +28,28 @@ local Tabs = {
     Main = Window:AddTab({ Title = "Main", Icon = "key" })
 }
 
--- Переменные для хранения ссылок
+-- Переменные
 local workLink = nil
 local linkLink = nil
 local attempts = 0
 local maxAttempts = 5
 local validating = false
 
--- Функция получения ссылок для обоих сервисов
+-- Функция получения ссылок
 local function fetchLinks()
-    -- Для Work.ink
+    -- Work.ink
     local w = Junkie
     w.service = work_service
     w.identifier = work_identifier
-    w.provider = "Work.ink"  -- или "Mixed", если провайдер настроен иначе
+    w.provider = "Work.ink"
     local wl, werr = w.get_key_link()
     if wl then
         workLink = wl
     else
-        Fluent:Notify({
-            Title = "Work.ink Error",
-            Content = "Failed to get link: " .. tostring(werr),
-            Duration = 5
-        })
+        Fluent:Notify({ Title = "Work.ink Error", Content = tostring(werr), Duration = 5 })
     end
 
-    -- Для Linkvertise
+    -- Linkvertise
     local l = Junkie
     l.service = link_service
     l.identifier = link_identifier
@@ -64,25 +58,13 @@ local function fetchLinks()
     if ll then
         linkLink = ll
     else
-        Fluent:Notify({
-            Title = "Linkvertise Error",
-            Content = "Failed to get link: " .. tostring(lerr),
-            Duration = 5
-        })
+        Fluent:Notify({ Title = "Linkvertise Error", Content = tostring(lerr), Duration = 5 })
     end
 
     if workLink or linkLink then
-        Fluent:Notify({
-            Title = "Links Ready",
-            Content = "You can now get your key from any provider.",
-            Duration = 3
-        })
+        Fluent:Notify({ Title = "Links Ready", Content = "You can now get your key.", Duration = 3 })
     else
-        Fluent:Notify({
-            Title = "Critical Error",
-            Content = "Could not get any links. Check Junkie settings.",
-            Duration = 5
-        })
+        Fluent:Notify({ Title = "Error", Content = "No links available. Check Junkie.", Duration = 5 })
     end
 end
 
@@ -92,46 +74,30 @@ Tabs.Main:AddParagraph({
     Content = "Choose a provider to get a key, then enter it below."
 })
 
--- Кнопка для Work.ink
+-- Кнопка Work.ink
 Tabs.Main:AddButton({
     Title = "Get Key (Work.ink)",
-    Description = "Copy Work.ink link to clipboard",
+    Description = "Copy Work.ink link",
     Callback = function()
         if workLink then
             setclipboard(workLink)
-            Fluent:Notify({
-                Title = "Work.ink Link Copied",
-                Content = "Open it in your browser to get the key.",
-                Duration = 3
-            })
+            Fluent:Notify({ Title = "Copied", Content = "Work.ink link copied!", Duration = 2 })
         else
-            Fluent:Notify({
-                Title = "Error",
-                Content = "Work.ink link not available. Try again later.",
-                Duration = 3
-            })
+            Fluent:Notify({ Title = "Error", Content = "Work.ink link not available.", Duration = 2 })
         end
     end
 })
 
--- Кнопка для Linkvertise
+-- Кнопка Linkvertise
 Tabs.Main:AddButton({
     Title = "Get Key (Linkvertise)",
-    Description = "Copy Linkvertise link to clipboard",
+    Description = "Copy Linkvertise link",
     Callback = function()
         if linkLink then
             setclipboard(linkLink)
-            Fluent:Notify({
-                Title = "Linkvertise Link Copied",
-                Content = "Open it in your browser to get the key.",
-                Duration = 3
-            })
+            Fluent:Notify({ Title = "Copied", Content = "Linkvertise link copied!", Duration = 2 })
         else
-            Fluent:Notify({
-                Title = "Error",
-                Content = "Linkvertise link not available. Try again later.",
-                Duration = 3
-            })
+            Fluent:Notify({ Title = "Error", Content = "Linkvertise link not available.", Duration = 2 })
         end
     end
 })
@@ -146,30 +112,27 @@ local keyInput = Tabs.Main:AddInput("KeyInput", {
     Callback = function() end
 })
 
--- Кнопка проверки ключа
+-- Кнопка проверки
 Tabs.Main:AddButton({
     Title = "OK",
-    Description = "Validate your key",
+    Description = "Validate key",
     Callback = function()
         if validating then return end
         local key = keyInput.Value
         if #key == 0 then
-            Fluent:Notify({ Title = "Error", Content = "Please enter a key!", Duration = 2 })
+            Fluent:Notify({ Title = "Error", Content = "Enter a key!", Duration = 2 })
             return
         end
-
         attempts = attempts + 1
         if attempts > maxAttempts then
-            Fluent:Notify({ Title = "Error", Content = "Too many failed attempts.", Duration = 3 })
+            Fluent:Notify({ Title = "Error", Content = "Too many attempts.", Duration = 3 })
             return
         end
-
         validating = true
-        Fluent:Notify({ Title = "Checking", Content = "Validating key...", Duration = 1.5 })
+        Fluent:Notify({ Title = "Checking", Content = "Validating...", Duration = 1.5 })
 
-        -- Используем сервис Work.ink для проверки (можно заменить на link_service)
         local checker = Junkie
-        checker.service = work_service
+        checker.service = work_service   -- можно использовать любой сервис
         checker.identifier = work_identifier
         checker.provider = "Work.ink"
 
@@ -177,7 +140,7 @@ Tabs.Main:AddButton({
         validating = false
 
         if result and result.valid then
-            Fluent:Notify({ Title = "Success", Content = "Key accepted! Loading script...", Duration = 2 })
+            Fluent:Notify({ Title = "Success", Content = "Key accepted! Loading...", Duration = 2 })
             getgenv().SCRIPT_KEY = key
             local success, err = pcall(function()
                 loadstring(game:HttpGet(MAIN_SCRIPT_URL))()
@@ -189,7 +152,7 @@ Tabs.Main:AddButton({
             end
         else
             local errorMsg = result and result.error or "Unknown error"
-            Fluent:Notify({ Title = "Invalid Key", Content = "Error: " .. errorMsg, Duration = 3 })
+            Fluent:Notify({ Title = "Invalid Key", Content = errorMsg, Duration = 3 })
             if errorMsg == "HWID_BANNED" then
                 task.wait(2)
                 game.Players.LocalPlayer:Kick("HWID banned")
@@ -198,15 +161,9 @@ Tabs.Main:AddButton({
     end
 })
 
--- Добавляем менеджеры (опционально)
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-InterfaceManager:SetFolder("sladko_keys")
-SaveManager:SetFolder("sladko_keys")
-SaveManager:BuildConfigSection(Tabs.Main)
-InterfaceManager:BuildInterfaceSection(Tabs.Main)
+-- Устанавливаем клавишу для скрытия окна (Insert)
+Window:SetMinimizeKey(Enum.KeyCode.Insert)
 
--- Запускаем получение ссылок при старте
+-- Получаем ссылки при старте
 fetchLinks()
 Window:SelectTab(1)

@@ -4,7 +4,7 @@ local Junkie = loadstring(game:HttpGet("https://jnkie.com/sdk/library.lua"))()
 -- ===== НАСТРОЙКИ (ЗАМЕНИТЬ) =====
 -- Данные для проверки ключа (из Junkie)
 local work_service = "sladko_work"      -- Твоё название сервиса
-local work_identifier = "15175"          -- Твой идентификатор (число)
+local work_identifier = "554171"          -- Твой идентификатор (число)
 
 -- Ссылка на основной скрипт в Junkie
 local MAIN_SCRIPT_URL = "https://api.jnkie.com/api/v1/luascripts/15175/download"
